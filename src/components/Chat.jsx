@@ -58,7 +58,7 @@ function Chat() {
       ))}
 
       <div className="mt-4">
-        <h3>Messages:</h3>
+        <h3 className="text-3xl font-bold underline">Messages:</h3>
         {chat.map((msg, i) => (
           <p key={i}>
             <b>{msg.from}:</b> {msg.message}
