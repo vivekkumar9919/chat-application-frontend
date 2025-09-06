@@ -17,7 +17,9 @@ function Chat() {
     if (userId) {
       socket.emit("join", userId);
     }
-
+    socket.on("connections", (msg) => {
+      console.log("connected");
+    })
     socket.on("onlineUsers", (users) => {
       setOnlineUsers(users);
     });
