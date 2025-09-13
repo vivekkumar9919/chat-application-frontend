@@ -1,17 +1,53 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
+import chatServices from '../main.service';
 
-const SignupPage = ({ onSignup, onSwitchToLogin }) => {
-    const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+const SignupPage = () => {
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({ 
+      username: '', 
+      email: '', 
+      password: '' 
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
   
-    const handleSubmit = (e) => {
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    };
+
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      onSignup({
-        id: 1,
-        name: formData.name,
-        email: formData.email,
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-      });
+      setLoading(true);
+      setError("");
+      setSuccess("");
+
+      try {
+        const response = await chatServices.signupService(formData);
+        console.log("signup response---------", response);
+        if (response.status_code === 200) {
+          setSuccess("Account created successfully! Please sign in.");
+          // Clear form
+          setFormData({ username: '', email: '', password: '' });
+          // Redirect to login after 2 seconds
+          setTimeout(() => {
+            navigate('/login');
+          }, 2000);
+        } else {
+          setError(response.message || "Signup failed");
+        }
+      } catch (err) {
+        setError("An error occurred during signup. Please try again.");
+        console.error("Signup error:", err);
+      } finally {
+        setLoading(false);
+      }
     };
   
     return (
@@ -28,41 +64,60 @@ const SignupPage = ({ onSignup, onSwitchToLogin }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <input
               type="text"
+              name="username"
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-              placeholder="Full Name"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleInputChange}
             />
             <input
               type="email"
+              name="email"
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               placeholder="Email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={handleInputChange}
             />
             <input
               type="password"
+              name="password"
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               placeholder="Password"
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={handleInputChange}
             />
+
+            {error && (
+              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="text-green-600 text-sm text-center bg-green-50 p-3 rounded-lg">
+                {success}
+              </div>
+            )}
             
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 rounded-lg hover:from-green-600 hover:to-blue-700 transition-all font-medium"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white py-3 rounded-lg hover:from-green-600 hover:to-blue-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
           
           <div className="text-center mt-6">
             <p className="text-gray-600">
               Already have an account?{' '}
-              <button onClick={onSwitchToLogin} className="text-green-600 hover:text-green-700 font-medium">
+              <button 
+                onClick={() => navigate('/login')} 
+                className="text-green-600 hover:text-green-700 font-medium"
+              >
                 Sign in
               </button>
             </p>
