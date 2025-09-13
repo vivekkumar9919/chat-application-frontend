@@ -1,17 +1,41 @@
 import React, { useState } from 'react';
 import { MessageCircle} from 'lucide-react';
+import chatServices from '../main.service';
 
 const LoginPage = ({ onLogin, onSwitchToSignup }) => {
     const [formData, setFormData] = useState({ email: '', password: '' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
   
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      onLogin({
-        id: 1,
-        name: 'John Doe',
-        email: formData.email,
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-      });
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await chatServices.loginService(formData);
+        
+        if (response.status_code === 200) {
+          // Store user data in localStorage
+          localStorage.setItem('user', JSON.stringify(response.user));
+          localStorage.setItem('isAuthenticated', 'true');
+          
+          // Call the onLogin callback with user data
+          onLogin({
+            id: response.user.id,
+            name: response.user.username || response.user.email,
+            email: response.user.email,
+            avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+          });
+        } else {
+          setError(response.message || "Login failed");
+        }
+      } catch (err) {
+        setError("An error occurred during login. Please try again.");
+        console.error("Login error:", err);
+      } finally {
+        setLoading(false);
+      }
     };
   
     return (
@@ -50,11 +74,18 @@ const LoginPage = ({ onLogin, onSwitchToSignup }) => {
               />
             </div>
             
+            {error && (
+              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all font-medium"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
           

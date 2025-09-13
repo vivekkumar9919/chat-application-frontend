@@ -1,20 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import { Edit, ArrowLeft } from 'lucide-react'
 
-const ProfilePage = ({ currentUser, onBack }) => {
+const ProfilePage = () => {
+    const [currentUser, setCurrentUser] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Get user data from localStorage
+        const user = localStorage.getItem('user');
+        const isAuthenticated = localStorage.getItem('isAuthenticated');
+        
+        if (!user || !isAuthenticated) {
+            navigate('/login');
+            return;
+        }
+        
+        try {
+            const userData = JSON.parse(user);
+            setCurrentUser({
+                id: userData.id,
+                name: userData.username || userData.email,
+                email: userData.email,
+                avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+            });
+        } catch (error) {
+            console.error('Error parsing user data:', error);
+            navigate('/login');
+        }
+    }, [navigate]);
+
     const [isEditing, setIsEditing] = useState(false);
     const [profileData, setProfileData] = useState({
-        name: currentUser.name,
-        email: currentUser.email,
+        name: '',
+        email: '',
         bio: 'Love building great products!'
     });
+
+    useEffect(() => {
+        if (currentUser) {
+            setProfileData({
+                name: currentUser.name,
+                email: currentUser.email,
+                bio: 'Love building great products!'
+            });
+        }
+    }, [currentUser]);
+
+    if (!currentUser) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white shadow-sm">
                 <div className="max-w-4xl mx-auto px-4 py-4">
                     <div className="flex items-center space-x-4">
-                        <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg">
+                        <button onClick={() => navigate('/chat')} className="p-2 hover:bg-gray-100 rounded-lg">
                             <ArrowLeft className="h-5 w-5 text-gray-600" />
                         </button>
                         <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
