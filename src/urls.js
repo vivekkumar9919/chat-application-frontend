@@ -1,4 +1,5 @@
-const BASE_URL = 'http://127.0.0.1:5000';
+// const BASE_URL = 'http://127.0.0.1:5000';
+const BASE_URL =  import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000'
 
 export const API_URLS = {
     SIGNUP_URL: `${BASE_URL}/api/v1/auth/signup`,
