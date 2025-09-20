@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./components/Login";
-import SignupPage from "./components/SignupPage";
-import ChatDashboard from "./components/ChatDashboard";
-import ProfilePage from "./components/ProfilePage";
-import SettingsPage from "./components/SettingsPage";
+import Login from "./pages/Login";
+import SignupPage from "./pages/SignupPage";
+import ChatDashboard from "./pages/ChatDashboard";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 
 function App() {
   return (
