@@ -1,18 +1,17 @@
-import React ,{useState} from "react";
+import React ,{useEffect, useState} from "react";
 import { 
     Send, 
     Phone, 
     Video, 
     MoreVertical,
   } from 'lucide-react';
+import chatServices from "../main.service";
+import { formatTimestamp } from "../utility/utils";
 
 
 const ChatWindow = ({ chat, currentUser }) => {
     const [message, setMessage] = useState('');
-    const [messages] = useState([
-      { id: 1, sender: 'Alice', content: 'Hey! How are you?', timestamp: '2:30 PM', isOwn: false },
-      { id: 2, sender: currentUser.name, content: 'I\'m great! How about you?', timestamp: '2:32 PM', isOwn: true }
-    ]);
+    const [messages, setMessages] = useState([]);
   
     const handleSend = (e) => {
       e.preventDefault();
@@ -20,15 +19,33 @@ const ChatWindow = ({ chat, currentUser }) => {
         setMessage('');
       }
     };
+
+    useEffect(() => {
+      console.log('ChatWindow - Selected chat:', chat);
+
+      const fetchMessages = async () =>{
+        try{
+          const msgs = await chatServices.fetchMessagesByConversationId(chat.conversation_id, currentUser.id);
+          console.log('Fetched messages:', msgs);
+          setMessages(msgs);
+        }
+        catch(err){
+          console.error('Error fetching messages:', err);
+        }
+      }
+
+      fetchMessages();
+
+    }, [chat]);
   
     return (
       <>
         <div className="bg-white border-b border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src={chat.avatar} alt={chat.name} className="w-10 h-10 rounded-full" />
+              <img src={chat.avatar} alt={chat.display_name} className="w-10 h-10 rounded-full" />
               <div>
-                <h3 className="font-semibold text-gray-900">{chat.name}</h3>
+                <h3 className="font-semibold text-gray-900">{chat.display_name}</h3>
                 <p className="text-sm text-gray-500">
                   {chat.type === 'direct' ? 'Online' : `${chat.members} members`}
                 </p>
@@ -49,9 +66,10 @@ const ChatWindow = ({ chat, currentUser }) => {
               <div className={`max-w-xs px-4 py-2 rounded-2xl ${
                 msg.isOwn ? 'bg-blue-500 text-white' : 'bg-white text-gray-900 border'
               }`}>
-                <p className="text-sm">{msg.content}</p>
+              <p className="font-semibold capitalize">{msg.username}</p>
+                <p className="text-sm">{msg.message_text}</p>
                 <p className={`text-xs mt-1 ${msg.isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
-                  {msg.timestamp}
+                  {formatTimestamp(msg.created_at)}
                 </p>
               </div>
             </div>
