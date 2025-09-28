@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
-import chatServices from "../main.service";
-
-// Reusable components
 import Input from "../components/Input/InputField";
 import ErrorMessage from "../components/ErrorMessage/ErrorMessage";
 import Button from "../components/Button/Button";
 import AuthLayout from "../components/Layouts/AuthLayout";
+import { useAuth } from "../components/Context/AuthContext";
 
 function SignupPage() {
   const navigate = useNavigate();
@@ -15,10 +13,11 @@ function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const { signup } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -27,22 +26,14 @@ function SignupPage() {
     setError("");
     setSuccess("");
 
-    try {
-      const response = await chatServices.signupService(formData);
-      if (response.status_code === 200) {
-        setSuccess("Account created successfully! Please sign in.");
-        setFormData({ username: "", email: "", password: "" });
-
-        setTimeout(() => navigate("/login"), 2000);
-      } else {
-        setError(response.message || "Signup failed");
-      }
-    } catch (err) {
-      setError("An error occurred during signup. Please try again.");
-      console.error("Signup error:", err);
-    } finally {
-      setLoading(false);
+    const result = await signup(formData);
+    if (result.success) {
+      setSuccess("Account created successfully!");
+      setTimeout(() => navigate("/chat"), 1500);
+    } else {
+      setError(result.message);
     }
+    setLoading(false);
   };
 
   return (

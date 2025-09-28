@@ -1,21 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import chatServices from "../main.service";
 import Input from "../components/Input/InputField";
 import ErrorMessage from "../components/ErrorMessage/ErrorMessage";
 import Button from "../components/Button/Button";
 import AuthLayout from "../components/Layouts/AuthLayout";
 import { User } from "lucide-react";
+import { useAuth } from "../components/Context/AuthContext";
 
 function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleLogin = async (e) => {
@@ -23,20 +24,13 @@ function LoginPage() {
     setLoading(true);
     setError("");
 
-    try {
-      const response = await chatServices.loginService(formData);
-      if (response.status_code === 200 || response.message) {
-        localStorage.setItem("user", JSON.stringify(response.user));
-        localStorage.setItem("isAuthenticated", "true");
-        navigate("/chat");
-      } else {
-        setError(response.message || "Login failed");
-      }
-    } catch {
-      setError("An error occurred during login. Please try again.");
-    } finally {
-      setLoading(false);
+    const result = await login(formData);
+    if (result.success) {
+      navigate("/chat");
+    } else {
+      setError(result.message);
     }
+    setLoading(false);
   };
 
   return (
@@ -62,7 +56,9 @@ function LoginPage() {
           placeholder="Password"
         />
         <ErrorMessage message={error} />
-        <Button type="submit" loading={loading}>Sign In</Button>
+        <Button type="submit" loading={loading}>
+          Sign In
+        </Button>
 
         <div className="text-center mt-6">
           <p className="text-gray-600">
