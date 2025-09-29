@@ -16,36 +16,14 @@ const ChatDashboard = () => {
     
 
     useEffect(() => {
-        // Get user data from localStorage
-        const user = localStorage.getItem('user');
-        const isAuthenticated = localStorage.getItem('isAuthenticated');
-        const userData = JSON.parse(user);
-        
-        console.log('ChatDashboard - User data:', user);
-        console.log('ChatDashboard - Is authenticated:', isAuthenticated);
-        
-        if (!user || !isAuthenticated) {
-            console.log('ChatDashboard - No user data, redirecting to login');
-            navigate('/login');
-            return;
-        }
-        
-        try {
-            // setCurrentUser({
-            //     id: userData.id,
-            //     name: userData.username || userData.email,
-            //     email: userData.email,
-            //     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
-            // });
-        } catch (error) {
-            console.error('Error parsing user data:', error);
-            navigate('/login');
-        }
-
+          if(!currentUser){
+          console.log('ChatDashboard - No user data, redirecting to login');
+          return;
+          }
 
         async function fetchConversations(){
           try{
-            const conversations = await chatServices.fetchConversationsByUserId(userData.id);
+            const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
             console.log('Fetched conversations:', conversations);
             setConversations(conversations);
           }
@@ -56,7 +34,7 @@ const ChatDashboard = () => {
 
         fetchConversations();
 
-    }, [navigate]);
+    }, [currentUser]);
 
     if (!currentUser) {
     return (

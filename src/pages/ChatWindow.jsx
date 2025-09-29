@@ -1,4 +1,4 @@
-import React ,{useEffect, useState} from "react";
+import React ,{useCallback, useEffect, useState} from "react";
 import { 
     Send, 
     Phone, 
@@ -7,18 +7,48 @@ import {
   } from 'lucide-react';
 import chatServices from "../main.service";
 import { formatTimestamp } from "../utility/utils";
+import { Socket } from "socket.io-client";
+import { useSocket } from "../components/Context/SocketContext";
 
 
 const ChatWindow = ({ chat, currentUser }) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
-  
-    const handleSend = (e) => {
-      e.preventDefault();
-      if (message.trim()) {
-        setMessage('');
-      }
+    const socket = useSocket();
+
+    useEffect(() => {
+    if (!socket) return;
+
+    socket.on("ping", (msg) => {
+      console.log("New message:", msg);
+    });
+
+    socket.emit("pong", "Hello from client");
+
+    return () => {
+      socket.off("ping"); // cleanup
     };
+  }, [socket]);
+  
+    
+    const handleSend = useCallback(async (e) => {
+      e.preventDefault();
+      if (message.trim() === '') return;
+  
+      const messagePayload = {
+        senderId: currentUser.id,
+        messageText: message.trim(),
+      };
+
+      try {
+        const result = await chatServices.sendMessage(messagePayload, chat.conversation_id);
+        console.log('Message sent:', result);
+        setMessages((prevMessages) => [...prevMessages, messagePayload]);
+        setMessage('');
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }, [message, currentUser.id]);
 
     useEffect(() => {
       console.log('ChatWindow - Selected chat:', chat);
@@ -36,7 +66,7 @@ const ChatWindow = ({ chat, currentUser }) => {
 
       fetchMessages();
 
-    }, [chat]);
+    }, [currentUser.id, chat]);
   
     return (
       <>
@@ -45,6 +75,7 @@ const ChatWindow = ({ chat, currentUser }) => {
             <div className="flex items-center space-x-3">
               <img src={chat.avatar} alt={chat.display_name} className="w-10 h-10 rounded-full" />
               <div>
+
                 <h3 className="font-semibold text-gray-900">{chat.display_name}</h3>
                 <p className="text-sm text-gray-500">
                   {chat.type === 'direct' ? 'Online' : `${chat.members} members`}
@@ -66,7 +97,7 @@ const ChatWindow = ({ chat, currentUser }) => {
               <div className={`max-w-xs px-4 py-2 rounded-2xl ${
                 msg.isOwn ? 'bg-blue-500 text-white' : 'bg-white text-gray-900 border'
               }`}>
-              <p className="font-semibold capitalize">{msg.username}</p>
+              <p className="font-semibold capitalize">{msg.isOwn ? 'You' :msg.sender_name}</p>
                 <p className="text-sm">{msg.message_text}</p>
                 <p className={`text-xs mt-1 ${msg.isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
                   {formatTimestamp(msg.created_at)}

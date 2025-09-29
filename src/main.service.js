@@ -57,6 +57,17 @@ const chatServices = {
         });
     },
 
+    async sendMessage(requestBody, conversationId) {
+        if(isDev){
+            return Promise.resolve(sampleResponse.sendMessageResponse);
+        }
+        return callApi({
+            url: `${API_URLS.MESSAGE_URL}/${conversationId}`,
+            method: 'POST',
+            body: requestBody
+        });
+    }
+
 }
 
 
