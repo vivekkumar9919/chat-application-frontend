@@ -5,9 +5,11 @@ import ChatWindow from "./ChatWindow";
 import { useAuth } from "../components/Context/AuthContext";
 
 const ChatDashboard = () => {
-  const { currentUser } = useAuth();
+  let  { currentUser, user } = useAuth();
+  currentUser = user;
   const [selectedChat, setSelectedChat] = useState(null);
   const navigate = useNavigate();
+  console.log("currentUser----------",currentUser, user)
 
   const [chats] = useState([
     {
@@ -53,13 +55,13 @@ const ChatDashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <img
-                src={currentUser.avatar}
+                src={currentUser?.avatar}
                 alt={currentUser.name}
                 className="w-10 h-10 rounded-full"
               />
               <div>
                 <h2 className="font-semibold text-gray-900">
-                  {currentUser.name}
+                  {currentUser?.name}
                 </h2>
                 <p className="text-sm text-green-600">Online</p>
               </div>
@@ -132,13 +134,13 @@ const ChatDashboard = () => {
             className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-lg w-full"
           >
             <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
+              src={currentUser?.avatar}
+              alt={currentUser?.name}
               className="w-8 h-8 rounded-full"
             />
             <div className="text-left">
               <p className="font-medium text-gray-900 text-sm">
-                {currentUser.name}
+                {currentUser?.name}
               </p>
               <p className="text-xs text-gray-500">View Profile</p>
             </div>

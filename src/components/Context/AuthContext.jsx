@@ -23,11 +23,13 @@ export const AuthProvider = ({ children }) => {
   const login = async (formData) => {
     try {
       const response = await chatServices.loginService(formData);
-      if (response.status_code === 200 && response.user) {
+      console.log("Login Response is -------", response)
+      if (response.user) {
         setUser(response.user);
         setIsAuthenticated(true);
         localStorage.setItem("user", JSON.stringify(response.user));
         localStorage.setItem("isAuthenticated", "true");
+        console.log("Login Response inside is -------", response)
         return { success: true };
       } else {
         return { success: false, message: response.message || "Login failed" };

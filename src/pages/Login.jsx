@@ -25,7 +25,7 @@ function LoginPage() {
     setError("");
 
     const result = await login(formData);
-    if (result.success) {
+    if (result.success || result.message == 'Login successful') {
       navigate("/chat");
     } else {
       setError(result.message);
