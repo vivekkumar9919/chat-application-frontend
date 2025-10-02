@@ -6,6 +6,7 @@ import ChatWindow from './ChatWindow'
 import chatServices from '../main.service';
 import { formatTimestamp } from '../utility/utils';
 import { useAuth } from "../components/Context/AuthContext";
+import STATUS_CODES from '../constants/statusCodes';
 
 const ChatDashboard = () => {
    const { user : currentUser } = useAuth();
@@ -23,9 +24,11 @@ const ChatDashboard = () => {
 
         async function fetchConversations(){
           try{
-            const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
-            console.log('Fetched conversations:', conversations);
-            setConversations(conversations);
+            const response = await chatServices.fetchConversationsByUserId(currentUser.id);
+            console.log('Fetched conversations:', response);
+            if(response?.status_code === STATUS_CODES.OK){
+              setConversations(response.conversations || []);
+            }
           }
           catch(err){
             console.error('Error fetching conversations:', err);
