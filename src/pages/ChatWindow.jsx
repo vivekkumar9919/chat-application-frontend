@@ -9,6 +9,7 @@ import chatServices from "../main.service";
 import { formatTimestamp } from "../utility/utils";
 import { Socket } from "socket.io-client";
 import { useSocket } from "../components/Context/SocketContext";
+import STATUS_CODES from "../constants/statusCodes";
 
 
 const ChatWindow = ({ chat, currentUser }) => {
@@ -55,9 +56,11 @@ const ChatWindow = ({ chat, currentUser }) => {
 
       const fetchMessages = async () =>{
         try{
-          const msgs = await chatServices.fetchMessagesByConversationId(chat.conversation_id, currentUser.id);
-          console.log('Fetched messages:', msgs);
-          setMessages(msgs);
+          const response = await chatServices.fetchMessagesByConversationId(chat.conversation_id, currentUser.id);
+          console.log('Fetched messages:', response);
+          if(response?.status_code === STATUS_CODES.OK){
+            setMessages(response.messages || []);
+          }
         }
         catch(err){
           console.error('Error fetching messages:', err);
