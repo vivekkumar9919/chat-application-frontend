@@ -4,12 +4,15 @@ import SignupPage from "./pages/SignupPage";
 import ChatDashboard from "./pages/ChatDashboard";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
-import { AuthProvider } from "./components/Context/AuthContext";
+import AuthProvider from "./components/Context/AuthProvider";
+import SocketProvider from "./components/Context/SocketProvider";
+
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+      <SocketProvider>
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
@@ -18,6 +21,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
+        </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
   );

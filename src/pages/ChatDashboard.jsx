@@ -1,40 +1,42 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, Users, Settings, MessageCircle } from "lucide-react";
-import ChatWindow from "./ChatWindow";
+
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import {Search, Users ,Settings, MessageCircle } from 'lucide-react'
+import ChatWindow from './ChatWindow'
+import chatServices from '../main.service';
+import { formatTimestamp } from '../utility/utils';
 import { useAuth } from "../components/Context/AuthContext";
 
 const ChatDashboard = () => {
-  const { currentUser } = useAuth();
-  const [selectedChat, setSelectedChat] = useState(null);
-  const navigate = useNavigate();
+   const { user : currentUser } = useAuth();
+    const [selectedChat, setSelectedChat] = useState(null);
+    const [conversations, setConversations] = useState([]);
+    const navigate = useNavigate();
 
-  const [chats] = useState([
-    {
-      id: 1,
-      name: "Alice Johnson",
-      avatar:
-        "https://images.unsplash.com/photo-1494790108755-2616b612b5eb?w=150&h=150&fit=crop&crop=face",
-      lastMessage: "Hey! How are you doing?",
-      timestamp: "2:30 PM",
-      unread: 3,
-      type: "direct",
-      status: "online",
-    },
-    {
-      id: 2,
-      name: "Team Project",
-      avatar:
-        "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150&h=150&fit=crop&crop=face",
-      lastMessage: "The deadline is tomorrow",
-      timestamp: "1:15 PM",
-      unread: 0,
-      type: "group",
-      members: 5,
-    },
-  ]);
+    
 
-  if (!currentUser) {
+    useEffect(() => {
+          if(!currentUser){
+          console.log('ChatDashboard - No user data, redirecting to login');
+          return;
+          }
+
+        async function fetchConversations(){
+          try{
+            const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
+            console.log('Fetched conversations:', conversations);
+            setConversations(conversations);
+          }
+          catch(err){
+            console.error('Error fetching conversations:', err);
+          }
+        }
+
+        fetchConversations();
+
+    }, [currentUser]);
+
+    if (!currentUser) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
@@ -53,13 +55,13 @@ const ChatDashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <img
-                src={currentUser.avatar}
+                src={currentUser?.avatar}
                 alt={currentUser.name}
                 className="w-10 h-10 rounded-full"
               />
               <div>
                 <h2 className="font-semibold text-gray-900">
-                  {currentUser.name}
+                  {currentUser?.name}
                 </h2>
                 <p className="text-sm text-green-600">Online</p>
               </div>
@@ -83,11 +85,11 @@ const ChatDashboard = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-2">
-          {chats.map((chat) => (
+          {conversations?.map((chat) => (
             <div
-              key={chat.id}
+              key={chat.conversation_id}
               onClick={() => setSelectedChat(chat)}
-              className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${selectedChat?.id === chat.id
+              className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${selectedChat?.conversation_id === chat.conversation_id
                   ? "bg-blue-50 border-l-4 border-blue-500"
                   : "hover:bg-gray-50"
                 }`}
@@ -95,7 +97,7 @@ const ChatDashboard = () => {
               <div className="relative">
                 <img
                   src={chat.avatar}
-                  alt={chat.name}
+                  alt={chat.display_name}
                   className="w-12 h-12 rounded-full"
                 />
                 {chat.type === "group" && (
@@ -108,18 +110,18 @@ const ChatDashboard = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold text-gray-900 truncate">
-                    {chat.name}
+                    {chat.display_name}
                   </h4>
-                  <span className="text-xs text-gray-500">{chat.timestamp}</span>
+                  <span className="text-xs text-gray-500">{formatTimestamp(chat.last_message_at)}</span>
                 </div>
                 <p className="text-sm text-gray-600 truncate">
-                  {chat.lastMessage}
+                  {chat.last_message}
                 </p>
               </div>
 
-              {chat.unread > 0 && (
+              {chat.unread_count > 0 && (
                 <div className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {chat.unread}
+                  {chat.unread_count}
                 </div>
               )}
             </div>
@@ -132,13 +134,13 @@ const ChatDashboard = () => {
             className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-lg w-full"
           >
             <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
+              src={currentUser?.avatar}
+              alt={currentUser?.name}
               className="w-8 h-8 rounded-full"
             />
             <div className="text-left">
               <p className="font-medium text-gray-900 text-sm">
-                {currentUser.name}
+                {currentUser?.name}
               </p>
               <p className="text-xs text-gray-500">View Profile</p>
             </div>

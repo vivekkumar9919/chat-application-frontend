@@ -25,7 +25,7 @@ function LoginPage() {
     setError("");
 
     const result = await login(formData);
-    if (result.success) {
+    if (result.success || result.message == 'Login successful') {
       navigate("/chat");
     } else {
       setError(result.message);
@@ -66,7 +66,7 @@ function LoginPage() {
             <button
               type="button"
               onClick={() => navigate("/signup")}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
             >
               Sign up
             </button>

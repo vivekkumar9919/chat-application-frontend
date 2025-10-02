@@ -3,7 +3,7 @@ import { callApi } from "./utility/apiClients";
 import sampleResponse from "./sampleResponse";
 import { API_URLS } from './urls'
 
-const isDev = false;
+const isDev = import.meta.env.NODE_ENV === "development" || false;
 
 const chatServices = {
     async loginService(requestBody) {
@@ -36,6 +36,37 @@ const chatServices = {
             body:requestBody
         });
     },
+
+    async fetchConversationsByUserId(userId) {
+        if(isDev){
+            return Promise.resolve(sampleResponse.conversationResponse);
+        }
+        return callApi({
+            url: `${API_URLS.CONVERSATION_URL}/user/${userId}`,
+            method: 'GET'
+        });
+    },
+
+    async fetchMessagesByConversationId(conversationId, currentUserId) {
+        if(isDev){
+            return Promise.resolve(sampleResponse.messageResponse);
+        }
+        return callApi({
+            url: `${API_URLS.MESSAGE_URL}/${conversationId}?userId=${currentUserId}`,
+            method: 'GET'
+        });
+    },
+
+    async sendMessage(requestBody, conversationId) {
+        if(isDev){
+            return Promise.resolve(sampleResponse.sendMessageResponse);
+        }
+        return callApi({
+            url: `${API_URLS.MESSAGE_URL}/${conversationId}`,
+            method: 'POST',
+            body: requestBody
+        });
+    }
 
 }
 
