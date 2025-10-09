@@ -22,7 +22,7 @@ const ProfilePage = () => {
                 id: userData.id,
                 name: userData.username || userData.email,
                 email: userData.email,
-                avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'
+                avatar: userData.avatar 
             });
         } catch (error) {
             console.error('Error parsing user data:', error);
