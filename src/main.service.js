@@ -66,6 +66,39 @@ const chatServices = {
             method: 'POST',
             body: requestBody
         });
+    },
+
+    // User search and management APIs
+    async searchUsers(query) {
+        if(isDev){
+            return Promise.resolve(sampleResponse.userSearchResponse);
+        }
+        return callApi({
+            url: `${API_URLS.USER_URL}/search?query=${encodeURIComponent(query)}`,
+            method: 'GET'
+        });
+    },
+
+    async fetchAllUsers() {
+        if(isDev){
+            return Promise.resolve(sampleResponse.allUsersResponse);
+        }
+        return callApi({
+            url: `${API_URLS.USER_URL}/fetchAll`,
+            method: 'GET'
+        });
+    },
+
+    // Conversation management APIs
+    async createConversation(type, userIds) {
+        if(isDev){
+            return Promise.resolve(sampleResponse.createConversationResponse);
+        }
+        return callApi({
+            url: `${API_URLS.CONVERSATION_URL}`,
+            method: 'POST',
+            body: { type, userIds }
+        });
     }
 
 }

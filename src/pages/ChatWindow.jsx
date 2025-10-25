@@ -7,66 +7,99 @@ import {
   } from 'lucide-react';
 import chatServices from "../main.service";
 import { formatTimestamp } from "../utility/utils";
-import { Socket } from "socket.io-client";
 import { useSocket } from "../components/Context/SocketContext";
 
 
 const ChatWindow = ({ chat, currentUser }) => {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
-    const socket = useSocket();
+    const { socket, isConnected } = useSocket();
 
+    // Socket event handlers
     useEffect(() => {
-    if (!socket) return;
+      if (!socket || !isConnected) return;
 
-    socket.on("ping", (msg) => {
-      console.log("New message:", msg);
-    });
-
-    socket.emit("pong", "Hello from client");
-
-    return () => {
-      socket.off("ping"); // cleanup
-    };
-  }, [socket]);
-  
-    
-    const handleSend = useCallback(async (e) => {
-      e.preventDefault();
-      if (message.trim() === '') return;
-  
-      const messagePayload = {
-        senderId: currentUser.id,
-        messageText: message.trim(),
+      // Handle incoming messages
+      const handleReceiveMessage = (messageData) => {
+        console.log('Received message:', messageData);
+        setMessages(prev => [...prev, messageData]);
       };
 
-      try {
-        const result = await chatServices.sendMessage(messagePayload, chat.conversation_id);
-        console.log('Message sent:', result);
-        setMessages((prevMessages) => [...prevMessages, messagePayload]);
-        setMessage('');
-      } catch (error) {
-        console.error('Error sending message:', error);
-      }
-    }, [message, currentUser.id]);
+      // Handle message sent confirmation
+      const handleMessageSent = (messageData) => {
+        console.log('Message sent confirmation:', messageData);
+        setMessages(prev => [...prev, messageData]);
+      };
 
+      // Handle message errors
+      const handleMessageError = (error) => {
+        console.error('Message error:', error);
+        // You can show a toast notification here
+      };
+
+      socket.on("receiveMessage", handleReceiveMessage);
+      socket.on("messageSent", handleMessageSent);
+      socket.on("messageError", handleMessageError);
+
+      return () => {
+        socket.off("receiveMessage", handleReceiveMessage);
+        socket.off("messageSent", handleMessageSent);
+        socket.off("messageError", handleMessageError);
+      };
+    }, [socket, isConnected]);
+  
+    
+    const handleSend = useCallback((e) => {
+      e.preventDefault();
+      if (message.trim() === '' || !socket || !isConnected) return;
+  
+      // Get receiver ID from chat (assuming it's the other participant)
+      const receiverId = chat.participants?.find(p => p !== currentUser.id);
+      
+      if (!receiverId) {
+        console.error('No receiver found for this conversation');
+        return;
+      }
+
+      // Send message via socket
+      socket.emit("sendMessage", {
+        conversationId: chat.conversation_id,
+        messageText: message.trim(),
+        senderId: currentUser.id,
+        receiverId: receiverId
+      });
+
+      setMessage('');
+    }, [message, currentUser.id, chat, socket, isConnected]);
+
+    // Load initial messages when chat changes
     useEffect(() => {
       console.log('ChatWindow - Selected chat:', chat);
 
       const fetchMessages = async () =>{
         try{
-          const msgs = await chatServices.fetchMessagesByConversationId(chat.conversation_id, currentUser.id);
-          console.log('Fetched messages:', msgs);
-          setMessages(msgs);
+          const response = await chatServices.fetchMessagesByConversationId(chat.conversation_id, currentUser.id);
+          console.log('Fetched messages response:', response);
+          
+          if (response.status_code === 200 && response.messages) {
+            setMessages(response.messages);
+          } else {
+            setMessages([]);
+          }
         }
         catch(err){
           console.error('Error fetching messages:', err);
+          setMessages([]);
         }
       }
 
-      fetchMessages();
+      if (chat && chat.conversation_id) {
+        fetchMessages();
+      } else {
+        setMessages([]);
+      }
 
-    }, [currentUser.id, chat]);
+    }, [currentUser.id, chat?.conversation_id]);
   
     return (
       <>
@@ -75,10 +108,13 @@ const ChatWindow = ({ chat, currentUser }) => {
             <div className="flex items-center space-x-3">
               <img src={chat.avatar} alt={chat.display_name} className="w-10 h-10 rounded-full" />
               <div>
-
-                <h3 className="font-semibold text-gray-900">{chat.display_name}</h3>
+                <div className="flex items-center space-x-2">
+                  <h3 className="font-semibold text-gray-900">{chat.display_name}</h3>
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} 
+                       title={isConnected ? 'Connected' : 'Disconnected'}></div>
+                </div>
                 <p className="text-sm text-gray-500">
-                  {chat.type === 'direct' ? 'Online' : `${chat.members} members`}
+                  {chat.type === 'direct' ? (isConnected ? 'Online' : 'Offline') : `${chat.members} members`}
                 </p>
               </div>
             </div>

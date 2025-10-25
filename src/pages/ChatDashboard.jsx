@@ -1,19 +1,40 @@
 
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {Search, Users ,Settings, MessageCircle } from 'lucide-react'
+import {Search, Users ,Settings, MessageCircle, Plus } from 'lucide-react'
 import ChatWindow from './ChatWindow'
+import UserSearch from '../components/UserSearch/UserSearch'
 import chatServices from '../main.service';
 import { formatTimestamp } from '../utility/utils';
 import { useAuth } from "../components/Context/AuthContext";
+import { useSocket } from "../components/Context/SocketContext";
 
 const ChatDashboard = () => {
    const { user : currentUser } = useAuth();
+   const { socket, isConnected } = useSocket();
     const [selectedChat, setSelectedChat] = useState(null);
     const [conversations, setConversations] = useState([]);
+    const [onlineUsers, setOnlineUsers] = useState([]);
+    const [isUserSearchOpen, setIsUserSearchOpen] = useState(false);
     const navigate = useNavigate();
 
     
+
+    // Socket event handlers for online users
+    useEffect(() => {
+      if (!socket || !isConnected) return;
+
+      const handleOnlineUsers = (users) => {
+        console.log('Online users:', users);
+        setOnlineUsers(users);
+      };
+
+      socket.on('onlineUsers', handleOnlineUsers);
+
+      return () => {
+        socket.off('onlineUsers', handleOnlineUsers);
+      };
+    }, [socket, isConnected]);
 
     useEffect(() => {
           if(!currentUser){
@@ -25,7 +46,7 @@ const ChatDashboard = () => {
           try{
             const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
             console.log('Fetched conversations:', conversations);
-            setConversations(conversations);
+            setConversations(conversations.conversations);
           }
           catch(err){
             console.error('Error fetching conversations:', err);
@@ -35,6 +56,31 @@ const ChatDashboard = () => {
         fetchConversations();
 
     }, [currentUser]);
+
+    // Handle conversation creation from user search
+    const handleConversationCreated = async (newConversation) => {
+      // Add the new conversation to the list
+      setConversations(prev => [newConversation, ...prev]);
+      setSelectedChat(newConversation);
+      
+      // Refresh the conversation list to get the latest data from server
+      try {
+        const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
+        if (conversations.status_code === 200) {
+          setConversations(conversations.conversations);
+          // Find and select the new conversation
+          console.log("fetchConversationsByUserId---", conversations)
+          const updatedConversation = conversations.conversations.find(
+            conv => conv.conversation_id === newConversation.conversation_id
+          );
+          if (updatedConversation) {
+            setSelectedChat(updatedConversation);
+          }
+        }
+      } catch (error) {
+        console.error('Error refreshing conversations:', error);
+      }
+    };
 
     if (!currentUser) {
     return (
@@ -63,7 +109,12 @@ const ChatDashboard = () => {
                 <h2 className="font-semibold text-gray-900">
                   {currentUser?.name}
                 </h2>
-                <p className="text-sm text-green-600">Online</p>
+                <div className="flex items-center space-x-1">
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                  <p className={`text-sm ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
+                    {isConnected ? 'Online' : 'Offline'}
+                  </p>
+                </div>
               </div>
             </div>
             <button
@@ -74,13 +125,22 @@ const ChatDashboard = () => {
             </button>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search conversations..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="flex space-x-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <button
+              onClick={() => setIsUserSearchOpen(true)}
+              className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+              title="Start new conversation"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
           </div>
         </div>
 
@@ -100,10 +160,15 @@ const ChatDashboard = () => {
                   alt={chat.display_name}
                   className="w-12 h-12 rounded-full"
                 />
-                {chat.type === "group" && (
+                {chat.type === "group" ? (
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
                     <Users className="h-2 w-2 text-white" />
                   </div>
+                ) : (
+                  // Show online status for direct messages
+                  <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
+                    onlineUsers.includes(chat.participants?.find(p => p !== currentUser.id)) ? 'bg-green-500' : 'bg-gray-400'
+                  }`}></div>
                 )}
               </div>
 
@@ -164,6 +229,13 @@ const ChatDashboard = () => {
           </div>
         )}
       </div>
+
+      {/* User Search Modal */}
+      <UserSearch
+        isOpen={isUserSearchOpen}
+        onClose={() => setIsUserSearchOpen(false)}
+        onConversationCreated={handleConversationCreated}
+      />
     </div>
   );
 };
