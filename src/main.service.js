@@ -91,6 +91,18 @@ const chatServices = {
                 group_name: groupName
             }
         });
+    },
+
+    async updateProfilePic(formData) {
+        if(isDev){
+            return Promise.resolve(sampleResponse.updateProfilePicResponse);
+        }
+        return callApi({
+            url: API_URLS.UPDATE_PROFILE_PIC_URL,
+            method: 'PATCH',
+            body: formData,
+            credentials: true
+        });
     }
 
 }

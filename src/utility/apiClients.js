@@ -6,6 +6,7 @@ export async function callApi({ url, method = 'GET', body = null, headers = {}, 
 
     const config = {
         method,
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             ...headers,
@@ -13,7 +14,13 @@ export async function callApi({ url, method = 'GET', body = null, headers = {}, 
     };
 
     if (body) {
-        config.body = JSON.stringify(body);
+        // For non-JSON bodies like FormData, avoid stringifying and overriding Content-Type
+        if (body instanceof FormData) {
+            delete config.headers['Content-Type'];  // Let browser set multipart boundary automatically
+            config.body = body;
+        } else {
+            config.body = JSON.stringify(body);
+        }
     }
 
     const response = await fetch(fullUrl, config);

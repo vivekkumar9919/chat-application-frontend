@@ -71,7 +71,7 @@ const ChatDashboard = () => {
             </div>
             <button
               onClick={() => navigate("/settings")}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+              className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
             >
               <Settings className="h-5 w-5 text-gray-600" />
             </button>
@@ -134,7 +134,7 @@ const ChatDashboard = () => {
         <div className="p-4 border-t border-gray-200">
           <button
             onClick={() => navigate("/profile")}
-            className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-lg w-full"
+            className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded-lg w-full cursor-pointer"
           >
             <img
               src={currentUser?.avatar}

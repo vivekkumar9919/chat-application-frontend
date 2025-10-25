@@ -6,6 +6,8 @@ import Button from "../components/Button/Button";
 import AuthLayout from "../components/Layouts/AuthLayout";
 import { User } from "lucide-react";
 import { useAuth } from "../components/Context/AuthContext";
+import STATUS_CODES from "../constants/statusCodes";
+import ToastService from "../utility/toastService";
 
 function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -20,17 +22,25 @@ function LoginPage() {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+   try{
+     e.preventDefault();
     setLoading(true);
     setError("");
 
     const result = await login(formData);
-    if (result.success || result.message == 'Login successful') {
+    if (result.success) {
+      
       navigate("/chat");
     } else {
       setError(result.message);
     }
     setLoading(false);
+   }  
+   catch(error){
+      console.error("Login error:", error);
+     setError("An unexpected error occurred");
+     setLoading(false);
+   }
   };
 
   return (

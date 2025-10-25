@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Edit, ArrowLeft } from 'lucide-react'
+import chatServices from "../main.service";
+import STATUS_CODES from "../constants/statusCodes";
+import ToastService from "../utility/toastService";
 
 const ProfilePage = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const navigate = useNavigate();
+    const fileInputRef = useRef(null);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         // Get user data from localStorage
@@ -47,6 +52,35 @@ const ProfilePage = () => {
         }
     }, [currentUser]);
 
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            setLoading(true);
+            const res = await chatServices.updateProfilePic(formData);
+
+            if (res.status_code === STATUS_CODES.OK && res.profilePicUrl) {
+                ToastService.show('success', 'Profile picture updated successfully');
+                const updatedUser = { ...JSON.parse(localStorage.getItem('user')), avatar: res.profilePicUrl };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                setCurrentUser(prev => ({ ...prev, avatar: res.profilePicUrl }));
+            }
+        } catch (error) {
+            ToastService.show('error', 'Failed to upload profile picture');
+            console.error('Error uploading profile picture:', error);
+        }
+        finally{
+            setLoading(false);
+        }
+
+        // Clear the input
+        e.target.value = '';
+    };
+
     if (!currentUser) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -77,10 +111,29 @@ const ProfilePage = () => {
 
                     <div className="px-6 pb-6">
                         <div className="flex items-end justify-between -mt-16 mb-6">
-                            <img src={currentUser.avatar} alt={currentUser.name} className="w-24 h-24 rounded-full border-4 border-white" />
+                            <div className="relative group">
+                                <img 
+                                    src={currentUser.avatar} 
+                                    alt={currentUser.name} 
+                                    className="w-24 h-24 rounded-full border-4 border-white group-hover:opacity-75 transition-opacity" 
+                                />
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="absolute -bottom-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity bg-blue-500 hover:bg-blue-600 p-2 rounded-full shadow-lg cursor-pointer"
+                                >
+                                    <Edit className="h-4 w-4 text-white" />
+                                </button>
+                            </div>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                            />
                             <button
                                 onClick={() => setIsEditing(!isEditing)}
-                                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2"
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2 cursor-pointer"
                             >
                                 <Edit className="h-4 w-4" />
                                 <span>{isEditing ? 'Cancel' : 'Edit Profile'}</span>
@@ -128,4 +181,4 @@ const ProfilePage = () => {
     );
 };
 
-export default ProfilePage; 
+export default ProfilePage;
