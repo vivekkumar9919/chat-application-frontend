@@ -68,16 +68,38 @@ const chatServices = {
         });
     },
 
-    async searchUsers(query){
+    // User search and management APIs
+    async searchUsers(query) {
         if(isDev){
-            return Promise.resolve(sampleResponse.searchUsersResponse);
+            return Promise.resolve(sampleResponse.userSearchResponse);
         }
         return callApi({
-            url: `${API_URLS.SEARCH_USERS_URL}?query=${encodeURIComponent(query)}`,
+            url: `${API_URLS.USER_URL}/search?query=${encodeURIComponent(query)}`,
             method: 'GET'
         });
     },
 
+    async fetchAllUsers() {
+        if(isDev){
+            return Promise.resolve(sampleResponse.allUsersResponse);
+        }
+        return callApi({
+            url: `${API_URLS.USER_URL}/fetchAll`,
+            method: 'GET'
+        });
+    },
+
+    // Conversation management APIs
+    async createConversation(type, userIds) {
+        if(isDev){
+            return Promise.resolve(sampleResponse.createConversationResponse);
+        }
+        return callApi({
+            url: `${API_URLS.CONVERSATION_URL}`,
+            method: 'POST',
+            body: { type, userIds }
+        })
+    },        
     async createOrGetConversation(userIds, type, groupName) {
         if (isDev) {
             return Promise.resolve(sampleResponse.createOrGetConversationResponse);

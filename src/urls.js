@@ -8,4 +8,5 @@ export const API_URLS = {
     MESSAGE_URL: `${BASE_URL}/api/v1/messages`,
     SEARCH_USERS_URL: `${BASE_URL}/api/v1/users/search`,
     UPDATE_PROFILE_PIC_URL: `${BASE_URL}/api/v1/users/profile-pic`,
+    USER_URL: `${BASE_URL}/api/v1/users`,
 };

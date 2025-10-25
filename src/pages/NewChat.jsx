@@ -59,7 +59,8 @@ const NewChat = () => {
     setIsCreatingChat(true);
     try {
       // Create or get existing conversation with this user
-      const response = await chatServices.createOrGetConversation([currentUser.id, user.id],'direct');
+      // const response = await chatServices.createOrGetConversation([currentUser.id, user.id],'direct');
+      const response = await chatServices.createConversation('direct', [currentUser.id, user.id]);
       
       console.log('Conversation response:', response);
 
@@ -221,6 +222,24 @@ const NewChat = () => {
                           {user.email || user.username || 'No email'}
                         </p>
                       </div>
+
+                      {/* <div className="flex-1 min-w-0 side-user-list">
+                      <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-gray-900 truncate">
+                            {chat.display_name}
+                          </h4>
+                          <span className="text-xs text-gray-500">{formatTimestamp(chat.last_message_at)}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 truncate">
+                          {chat.last_message}
+                        </p>
+                      </div>
+
+                      {chat.unread_count > 0 && (
+                        <div className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {chat.unread_count}
+                        </div>
+                      )} */}
                     </div>
 
                     <button
