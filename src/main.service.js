@@ -66,6 +66,31 @@ const chatServices = {
             method: 'POST',
             body: requestBody
         });
+    },
+
+    async searchUsers(query){
+        if(isDev){
+            return Promise.resolve(sampleResponse.searchUsersResponse);
+        }
+        return callApi({
+            url: `${API_URLS.SEARCH_USERS_URL}?query=${encodeURIComponent(query)}`,
+            method: 'GET'
+        });
+    },
+
+    async createOrGetConversation(userIds, type, groupName) {
+        if (isDev) {
+            return Promise.resolve(sampleResponse.createOrGetConversationResponse);
+        }
+        return callApi({
+            url: API_URLS.CONVERSATION_URL,
+            method: 'POST',
+            body: {
+                userIds: userIds,
+                type: type,
+                group_name: groupName
+            }
+        });
     }
 
 }

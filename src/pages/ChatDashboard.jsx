@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {Search, Users ,Settings, MessageCircle } from 'lucide-react'
+import {Search, Users ,Settings, MessageCircle, UserPlus } from 'lucide-react'
 import ChatWindow from './ChatWindow'
 import chatServices from '../main.service';
 import { formatTimestamp } from '../utility/utils';
 import { useAuth } from "../components/Context/AuthContext";
+import STATUS_CODES from '../constants/statusCodes';
 
 const ChatDashboard = () => {
    const { user : currentUser } = useAuth();
@@ -23,9 +24,11 @@ const ChatDashboard = () => {
 
         async function fetchConversations(){
           try{
-            const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
-            console.log('Fetched conversations:', conversations);
-            setConversations(conversations);
+            const response = await chatServices.fetchConversationsByUserId(currentUser.id);
+            console.log('Fetched conversations:', response);
+            if(response?.status_code === STATUS_CODES.OK){
+              setConversations(response.conversations || []);
+            }
           }
           catch(err){
             console.error('Error fetching conversations:', err);
@@ -50,7 +53,7 @@ const ChatDashboard = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-80 bg-white border-r border-gray-200 flex flex-col relative">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -96,7 +99,7 @@ const ChatDashboard = () => {
             >
               <div className="relative">
                 <img
-                  src={chat.avatar}
+                  src={chat.avatar_url}
                   alt={chat.display_name}
                   className="w-12 h-12 rounded-full"
                 />
@@ -146,6 +149,14 @@ const ChatDashboard = () => {
             </div>
           </button>
         </div>
+
+        <button 
+        className='absolute bottom-24 right-2 w-12 h-12 bg-blue-600
+         rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-blue-700'
+         onClick={() => navigate('/new-chat')}
+         >
+          <UserPlus className="h-5 w-5 text-white" />
+        </button>
       </div>
 
       {/* Chat Area */}
