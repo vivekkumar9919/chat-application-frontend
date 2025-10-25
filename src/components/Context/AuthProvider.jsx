@@ -31,8 +31,8 @@ const AuthProvider = ({ children }) => {
       } else {
         return { success: false, message: response.message || "Login failed" };
       }
-    } catch {
-      return { success: false, message: "Error during login" };
+    } catch(err) {
+      return { success: false, message: err.message || "Error during login" };
     }
   };
 

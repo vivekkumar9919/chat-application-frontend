@@ -8,6 +8,7 @@ import {
 import chatServices from "../main.service";
 import { formatTimestamp } from "../utility/utils";
 import { useSocket } from "../components/Context/SocketContext";
+import STATUS_CODES from "../constants/statusCodes";
 
 
 const ChatWindow = ({ chat, currentUser }) => {
@@ -81,7 +82,7 @@ const ChatWindow = ({ chat, currentUser }) => {
           const response = await chatServices.fetchMessagesByConversationId(chat.conversation_id, currentUser.id);
           console.log('Fetched messages response:', response);
           
-          if (response.status_code === 200 && response.messages) {
+          if (response?.status_code === STATUS_CODES.OK) {
             setMessages(response.messages);
           } else {
             setMessages([]);
@@ -106,7 +107,7 @@ const ChatWindow = ({ chat, currentUser }) => {
         <div className="bg-white border-b border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src={chat.avatar} alt={chat.display_name} className="w-10 h-10 rounded-full" />
+              <img src={chat.avatar_url} alt={chat.display_name} className="w-10 h-10 rounded-full" />
               <div>
                 <div className="flex items-center space-x-2">
                   <h3 className="font-semibold text-gray-900">{chat.display_name}</h3>

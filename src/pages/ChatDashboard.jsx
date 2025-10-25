@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {Search, Users ,Settings, MessageCircle, Plus } from 'lucide-react'
+import {Search, Users ,Settings, MessageCircle, Plus, UserPlus } from 'lucide-react'
 import ChatWindow from './ChatWindow'
 import UserSearch from '../components/UserSearch/UserSearch'
 import chatServices from '../main.service';
 import { formatTimestamp } from '../utility/utils';
 import { useAuth } from "../components/Context/AuthContext";
 import { useSocket } from "../components/Context/SocketContext";
+import STATUS_CODES from '../constants/statusCodes';
 
 const ChatDashboard = () => {
    const { user : currentUser } = useAuth();
@@ -46,7 +47,9 @@ const ChatDashboard = () => {
           try{
             const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
             console.log('Fetched conversations:', conversations);
-            setConversations(conversations.conversations);
+            if(conversations?.status_code === STATUS_CODES.OK){
+              setConversations(conversations.conversations || []);
+            }
           }
           catch(err){
             console.error('Error fetching conversations:', err);
@@ -96,7 +99,7 @@ const ChatDashboard = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+      <div className="w-80 bg-white border-r border-gray-200 flex flex-col relative">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
@@ -134,13 +137,14 @@ const ChatDashboard = () => {
                 className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <button
+            {/* <button
               onClick={() => setIsUserSearchOpen(true)}
               className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
               title="Start new conversation"
             >
               <Plus className="h-4 w-4" />
-            </button>
+            </button> */}
+            
           </div>
         </div>
 
@@ -156,7 +160,7 @@ const ChatDashboard = () => {
             >
               <div className="relative">
                 <img
-                  src={chat.avatar}
+                  src={chat.avatar_url}
                   alt={chat.display_name}
                   className="w-12 h-12 rounded-full"
                 />
@@ -172,7 +176,7 @@ const ChatDashboard = () => {
                 )}
               </div>
 
-              <div className="flex-1 min-w-0">
+              {/* <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold text-gray-900 truncate">
                     {chat.display_name}
@@ -188,7 +192,9 @@ const ChatDashboard = () => {
                 <div className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {chat.unread_count}
                 </div>
-              )}
+              )} */}
+
+
             </div>
           ))}
         </div>
@@ -211,6 +217,14 @@ const ChatDashboard = () => {
             </div>
           </button>
         </div>
+
+        <button 
+        className='absolute bottom-24 right-2 w-12 h-12 bg-blue-600
+         rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-blue-700'
+         onClick={() => navigate('/new-chat')}
+         >
+          <UserPlus className="h-5 w-5 text-white" />
+        </button>
       </div>
 
       {/* Chat Area */}
@@ -231,11 +245,13 @@ const ChatDashboard = () => {
       </div>
 
       {/* User Search Modal */}
-      <UserSearch
+      {/* <UserSearch
         isOpen={isUserSearchOpen}
         onClose={() => setIsUserSearchOpen(false)}
         onConversationCreated={handleConversationCreated}
-      />
+      /> */}
+
+      
     </div>
   );
 };

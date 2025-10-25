@@ -6,5 +6,6 @@ export const API_URLS = {
     LOGOUT_URL: `${BASE_URL}/api/v1/auth/logout`,
     CONVERSATION_URL: `${BASE_URL}/api/v1/conversations`,
     MESSAGE_URL: `${BASE_URL}/api/v1/messages`,
-    USER_URL: `${BASE_URL}/api/v1/users`
+    USER_URL: `${BASE_URL}/api/v1/users`,
+    SEARCH_USERS_URL: `${BASE_URL}/api/v1/users/search`
 };

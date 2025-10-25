@@ -98,6 +98,20 @@ const chatServices = {
             url: `${API_URLS.CONVERSATION_URL}`,
             method: 'POST',
             body: { type, userIds }
+        })
+    },        
+    async createOrGetConversation(userIds, type, groupName) {
+        if (isDev) {
+            return Promise.resolve(sampleResponse.createOrGetConversationResponse);
+        }
+        return callApi({
+            url: API_URLS.CONVERSATION_URL,
+            method: 'POST',
+            body: {
+                userIds: userIds,
+                type: type,
+                group_name: groupName
+            }
         });
     }
 
