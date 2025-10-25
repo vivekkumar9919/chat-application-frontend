@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {Search, Users ,Settings, MessageCircle, Plus, UserPlus } from 'lucide-react'
+import {Search, Users ,Settings, MessageCircle, Plus, UserPlus, LogOut } from 'lucide-react'
 import ChatWindow from './ChatWindow'
 import UserSearch from '../components/UserSearch/UserSearch'
 import chatServices from '../main.service';
@@ -9,6 +9,7 @@ import { formatTimestamp } from '../utility/utils';
 import { useAuth } from "../components/Context/AuthContext";
 import { useSocket } from "../components/Context/SocketContext";
 import STATUS_CODES from '../constants/statusCodes';
+import Tooltip from '../components/Tooltip/Tooltip'
 
 const ChatDashboard = () => {
    const { user : currentUser } = useAuth();
@@ -58,31 +59,30 @@ const ChatDashboard = () => {
 
         fetchConversations();
 
-    }, [currentUser]);
+    }, [currentUser,navigate]);
 
-    // Handle conversation creation from user search
-    const handleConversationCreated = async (newConversation) => {
-      // Add the new conversation to the list
-      setConversations(prev => [newConversation, ...prev]);
-      setSelectedChat(newConversation);
-      
-      // Refresh the conversation list to get the latest data from server
-      try {
-        const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
-        if (conversations.status_code === 200) {
-          setConversations(conversations.conversations);
-          // Find and select the new conversation
-          console.log("fetchConversationsByUserId---", conversations)
-          const updatedConversation = conversations.conversations.find(
-            conv => conv.conversation_id === newConversation.conversation_id
-          );
-          if (updatedConversation) {
-            setSelectedChat(updatedConversation);
-          }
+    const handleLogout = async () => {
+        try {
+            // Get user data from localStorage
+            const user = JSON.parse(localStorage.getItem('user'));
+            
+            if (user) {
+                await chatServices.logoutService({ user_id: user.id });
+            }
+            
+            // Clear localStorage
+            localStorage.removeItem('user');
+            localStorage.removeItem('isAuthenticated');
+            
+            // Redirect to login page
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Even if logout fails, clear local storage and redirect
+            localStorage.removeItem('user');
+            localStorage.removeItem('isAuthenticated');
+            navigate('/login');
         }
-      } catch (error) {
-        console.error('Error refreshing conversations:', error);
-      }
     };
 
     if (!currentUser) {
@@ -120,12 +120,26 @@ const ChatDashboard = () => {
                 </div>
               </div>
             </div>
+            <div className='flex items-center'>
+            <Tooltip text="Settings" position="bottom">
             <button
               onClick={() => navigate("/settings")}
               className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
             >
               <Settings className="h-5 w-5 text-gray-600" />
             </button>
+            </Tooltip>
+              
+            <Tooltip text="Logout" position="bottom">
+             <button 
+                onClick={handleLogout}
+                className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg text-orange-600 cursor-pointer"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </Tooltip>
+           
+            </div>
           </div>
 
           <div className="flex space-x-2">
@@ -137,14 +151,6 @@ const ChatDashboard = () => {
                 className="w-full pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            {/* <button
-              onClick={() => setIsUserSearchOpen(true)}
-              className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
-              title="Start new conversation"
-            >
-              <Plus className="h-4 w-4" />
-            </button> */}
-            
           </div>
         </div>
 
@@ -160,7 +166,7 @@ const ChatDashboard = () => {
             >
               <div className="relative">
                 <img
-                  src={chat.avatar_url}
+                  src={chat.avatar}
                   alt={chat.display_name}
                   className="w-12 h-12 rounded-full"
                 />
@@ -176,7 +182,7 @@ const ChatDashboard = () => {
                 )}
               </div>
 
-              {/* <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <h4 className="font-semibold text-gray-900 truncate">
                     {chat.display_name}
@@ -192,7 +198,7 @@ const ChatDashboard = () => {
                 <div className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {chat.unread_count}
                 </div>
-              )} */}
+              )}
 
 
             </div>
@@ -243,15 +249,6 @@ const ChatDashboard = () => {
           </div>
         )}
       </div>
-
-      {/* User Search Modal */}
-      {/* <UserSearch
-        isOpen={isUserSearchOpen}
-        onClose={() => setIsUserSearchOpen(false)}
-        onConversationCreated={handleConversationCreated}
-      /> */}
-
-      
     </div>
   );
 };

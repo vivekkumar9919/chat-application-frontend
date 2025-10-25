@@ -107,7 +107,7 @@ const ChatWindow = ({ chat, currentUser }) => {
         <div className="bg-white border-b border-gray-200 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img src={chat.avatar_url} alt={chat.display_name} className="w-10 h-10 rounded-full" />
+              <img src={chat.avatar} alt={chat.display_name} className="w-10 h-10 rounded-full" />
               <div>
                 <div className="flex items-center space-x-2">
                   <h3 className="font-semibold text-gray-900">{chat.display_name}</h3>

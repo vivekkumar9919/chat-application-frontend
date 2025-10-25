@@ -41,7 +41,7 @@ const SettingsPage = () => {
         <div className="bg-white shadow-sm">
           <div className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-center space-x-4">
-              <button onClick={() => navigate('/chat')} className="p-2 hover:bg-gray-100 rounded-lg">
+              <button onClick={() => navigate('/chat')} className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
                 <ArrowLeft className="h-5 w-5 text-gray-600" />
               </button>
               <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
@@ -79,21 +79,21 @@ const SettingsPage = () => {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Account</h2>
             
             <div className="space-y-3">
-              <button className="w-full text-left p-3 hover:bg-gray-50 rounded-lg text-gray-700">
+              <button className="w-full text-left p-3 hover:bg-gray-50 rounded-lg text-gray-700 cursor-pointer">
                 Change Password
               </button>
-              <button className="w-full text-left p-3 hover:bg-gray-50 rounded-lg text-gray-700">
+              <button className="w-full text-left p-3 hover:bg-gray-50 rounded-lg text-gray-700 cursor-pointer">
                 Export Chat Data
               </button>
               <button 
                 onClick={handleLogout}
                 disabled={loading}
-                className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg text-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg text-orange-600 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
                 <LogOut className="h-4 w-4" />
                 <span>{loading ? "Signing out..." : "Sign Out"}</span>
               </button>
-              <button className="w-full text-left p-3 hover:bg-gray-50 rounded-lg text-red-600">
+              <button className="w-full text-left p-3 hover:bg-gray-50 rounded-lg text-red-600 cursor-pointer">
                 Delete Account
               </button>
             </div>
