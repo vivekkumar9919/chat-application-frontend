@@ -50,7 +50,7 @@ const ProfilePage = () => {
                 bio: 'Love building great products!'
             });
         }
-    }, [currentUser]);
+    }, [currentUser,setCurrentUser]);
 
     const handleFileChange = async (e) => {
         const file = e.target.files[0];
@@ -63,11 +63,11 @@ const ProfilePage = () => {
             setLoading(true);
             const res = await chatServices.updateProfilePic(formData);
 
-            if (res.status_code === STATUS_CODES.OK && res.profilePicUrl) {
+            if (res.status_code === STATUS_CODES.OK) {
                 ToastService.show('success', 'Profile picture updated successfully');
-                const updatedUser = { ...JSON.parse(localStorage.getItem('user')), avatar: res.profilePicUrl };
+                const updatedUser = { ...JSON.parse(localStorage.getItem('user')), avatar: res.user.profile_pic };
                 localStorage.setItem('user', JSON.stringify(updatedUser));
-                setCurrentUser(prev => ({ ...prev, avatar: res.profilePicUrl }));
+                setCurrentUser(prev => ({ ...prev, avatar: res.user.profile_pic }));
             }
         } catch (error) {
             ToastService.show('error', 'Failed to upload profile picture');

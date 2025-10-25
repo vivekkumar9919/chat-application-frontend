@@ -7,10 +7,10 @@ const sampleResponse = {
         "message": "Login successful",
         "error": null,
         "user": {
-          "id": 2,
-          "email": "exampleuser@example1.com",
-          "created_at": "2025-09-13T08:58:52.909Z",
-          "updated_at": "2025-09-13T08:58:52.909Z"
+            "id": 2,
+            "email": "exampleuser@example1.com",
+            "created_at": "2025-09-13T08:58:52.909Z",
+            "updated_at": "2025-09-13T08:58:52.909Z"
         }
     },
     logoutResponse: {
@@ -33,8 +33,7 @@ const sampleResponse = {
         "success": true,
         "message": "Profile picture updated successfully",
         "profilePicUrl": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    }
-
+    },
     // Conversation responses
     conversationResponse: {
         "status_code": 200,
@@ -53,7 +52,7 @@ const sampleResponse = {
             },
             {
                 "conversation_id": 2,
-                "type": "direct", 
+                "type": "direct",
                 "display_name": "jane_smith",
                 "other_user_id": 4,
                 "avatar": null,
@@ -90,14 +89,20 @@ const sampleResponse = {
     },
 
     sendMessageResponse: {
-        "status_code": 201,
-        "message": "Message sent successfully",
-        "message": {
-            "messageId": 3,
-            "conversationId": 1,
-            "senderId": 2,
-            "messageText": "This is a test message"
-        }
+        "message": "Messages fetched successfully",
+        "success": true,
+        "status_code": 200,
+        "messages": [
+            {
+                "id": 1,
+                "message_text": "hi",
+                "status": "sent",
+                "created_at": "2025-10-25T12:50:51.637Z",
+                "sender_id": 1,
+                "sender_name": "exampleuser",
+                "isOwn": true
+            }
+        ]
     },
 
     // User search and management responses
