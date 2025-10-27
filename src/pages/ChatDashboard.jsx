@@ -23,17 +23,36 @@ const ChatDashboard = () => {
     useEffect(() => {
       if (!socket || !isConnected) return;
 
+      const audio = new Audio('../assets/Iphone - Ting _ Message.mp3');
+
+      const playNotificationSound = () => {
+    audio.currentTime = 0; // rewind, so rapid messages all play
+    audio.play()
+      .catch(err => console.warn('Audio playback failed:', err));
+  };
       const handleOnlineUsers = (users) => {
         console.log('Online users:', users);
+        console.log("conversations -- ", conversations);
         setOnlineUsers(users);
+        console.log("current id -- ", currentUser.id);
       };
 
+      const handleReceiveMessage = async (messageData) => {
+        console.log('Received message in dashboard:', messageData);
+
+          setConversations(messageData?.conversations);
+          // Ta-da! Sound!
+          playNotificationSound();
+      }
+
       socket.on('onlineUsers', handleOnlineUsers);
+      socket.on(`newMessageNotification`, handleReceiveMessage)
 
       return () => {
         socket.off('onlineUsers', handleOnlineUsers);
+        socket.off(`newMessageNotification`, handleReceiveMessage);
       };
-    }, [socket, isConnected]);
+    }, [socket, isConnected, currentUser.id]);
 
     useEffect(() => {
           if(!currentUser){
