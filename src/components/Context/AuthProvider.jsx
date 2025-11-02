@@ -24,16 +24,16 @@ const AuthProvider = ({ children }) => {
   const login = async (formData) => {
     try {
       const response = await chatServices.loginService(formData);
-      if (response.status_code === STATUS_CODES.OK && response.user) {
-        ToastService.show("success", response.message || "Login successful");
+      if (response?.status_code === STATUS_CODES?.OK && response?.user) {
+        ToastService.show("success", response?.message || "Login successful");
         setUser(response.user);
         setIsAuthenticated(true);
-        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("user", JSON.stringify(response?.user));
         localStorage.setItem("isAuthenticated", "true");
         return { success: true };
       } else {
-        ToastService.show("error", response.message || "Login failed");
-        return { success: false, message: response.message || "Login failed" };
+        ToastService.show("error", response?.message || "Login failed");
+        return { success: false, message: response?.message || "Login failed" };
       }
     } catch(err) {
       ToastService.show("error", "An unexpected error occurred");

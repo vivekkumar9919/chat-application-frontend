@@ -8,6 +8,7 @@ import { User } from "lucide-react";
 import { useAuth } from "../components/Context/AuthContext";
 import STATUS_CODES from "../constants/statusCodes";
 import ToastService from "../utility/toastService";
+import LogoUrl from '../assets/sandesh-bg-gray.png'
 
 function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -46,8 +47,9 @@ function LoginPage() {
   return (
     <AuthLayout title="Welcome Back" subtitle="Sign in to your account">
       <div className="flex justify-center mb-6">
-        <div className="bg-gradient-to-r from-green-500 to-blue-600 w-16 h-16 rounded-full flex items-center justify-center">
-          <User className="h-8 w-8 text-white" />
+        <div className="w-20 h-20 flex items-center justify-center">
+          {/* <User className="h-8 w-8 text-white" /> */}
+          <img src={LogoUrl} alt="sandesh-logo"/>
         </div>
       </div>
       <form onSubmit={handleLogin} className="space-y-6">

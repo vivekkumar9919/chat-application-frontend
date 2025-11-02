@@ -8,6 +8,7 @@ import { useAuth } from "../components/Context/AuthContext";
 import { useSocket } from "../components/Context/SocketContext";
 import STATUS_CODES from '../constants/statusCodes';
 import Tooltip from '../components/Tooltip/Tooltip'
+import LogoWhiteUrl from '../assets/sandesh-logo-white.png';
 
 const ChatDashboard = () => {
    const { user : currentUser } = useAuth();
@@ -34,7 +35,7 @@ const ChatDashboard = () => {
         console.log('Online users:', users);
         console.log("conversations -- ", conversations);
         setOnlineUsers(users);
-        console.log("current id -- ", currentUser.id);
+        console.log("current id -- ", currentUser?.id);
       };
 
       const handleReceiveMessage = async (messageData) => {
@@ -52,7 +53,7 @@ const ChatDashboard = () => {
         socket.off('onlineUsers', handleOnlineUsers);
         socket.off(`newMessageNotification`, handleReceiveMessage);
       };
-    }, [socket, isConnected, currentUser.id]);
+    }, [socket, isConnected, currentUser?.id]);
 
     useEffect(() => {
           if(!currentUser){
@@ -62,7 +63,7 @@ const ChatDashboard = () => {
 
         async function fetchConversations(){
           try{
-            const conversations = await chatServices.fetchConversationsByUserId(currentUser.id);
+            const conversations = await chatServices.fetchConversationsByUserId(currentUser?.id);
             console.log('Fetched conversations:', conversations);
             if(conversations?.status_code === STATUS_CODES.OK){
               setConversations(conversations.conversations || []);
@@ -90,7 +91,17 @@ const ChatDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-950">
-      {/* Sidebar */}
+{/* 
+    <header className="flex items-center justify-between py-3 border-b border-gray-800 bg-gray-900">
+      <div className="flex items-center space-x-3">
+        <img
+          src={LogoWhiteUrl}
+          alt="Sandesh Logo"
+          className="w-36 h-16"
+        />
+      </div>
+    </header> */}
+{/* Sidebar */}
       <div className="w-80 bg-gray-900 border-r border-gray-800 flex flex-col relative">
         {/* Header */}
         <div className="p-4 border-b border-gray-800">
@@ -99,7 +110,7 @@ const ChatDashboard = () => {
               <div className="relative">
                 <img
                   src={currentUser?.avatar}
-                  alt={currentUser.name}
+                  alt={currentUser?.name}
                   className="w-11 h-11 rounded-full ring-2 ring-blue-600 ring-offset-2 ring-offset-gray-900"
                 />
                 <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-gray-900 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
@@ -161,7 +172,7 @@ const ChatDashboard = () => {
                   </div>
                 ) : (
                   <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-gray-900 ${
-                    onlineUsers.includes(chat.participants?.find(p => p !== currentUser.id)) ? 'bg-green-500' : 'bg-gray-600'
+                    onlineUsers?.includes(chat.participants?.find(p => p !== currentUser?.id)) ? 'bg-green-500' : 'bg-gray-600'
                   }`}></div>
                 )}
               </div>
@@ -245,6 +256,7 @@ const ChatDashboard = () => {
           </div>
         )}
       </div>
+      
     </div>
   );
 };

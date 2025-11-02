@@ -1,10 +1,10 @@
 import toast from "react-hot-toast";
 
 class ToastService {
-    static show(type, message, options) {
+    static show(type, message, options, setTimeoutTime = 1500) {
         const toastType = type.toLowerCase();
         const fakePromise = new Promise((resolve) =>
-            setTimeout(resolve, 1500)
+            setTimeout(resolve, setTimeoutTime)
         )
         switch (toastType) {
             case "success":
