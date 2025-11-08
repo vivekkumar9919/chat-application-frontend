@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import Toast from "../components/customs/toast";
 
 class ToastService {
     static show(type, message, options, setTimeoutTime = 1500) {
@@ -20,6 +21,10 @@ class ToastService {
                     success: message || "Completed!",
                     error: "Oops! Something failed",
                 });
+            case "notify":
+                return toast.custom((t) => (
+                    Toast(t, message, options)
+                ))
             default:
                 return toast(message, options);
         }

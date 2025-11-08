@@ -10,8 +10,7 @@ export async function callApi({ url, method = 'GET', body = null, headers = {}, 
         headers: {
             'Content-Type': 'application/json',
             ...headers,
-        },
-        credentials: 'include', // Include cookies in requests
+        }
     };
 
     if (body) {

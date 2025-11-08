@@ -9,4 +9,5 @@ export const API_URLS = {
     SEARCH_USERS_URL: `${BASE_URL}/api/v1/users/search`,
     UPDATE_PROFILE_PIC_URL: `${BASE_URL}/api/v1/users/profile-pic`,
     USER_URL: `${BASE_URL}/api/v1/users`,
+    SAVE_SUBSCRIPTION_URL: `${BASE_URL}/api/v1/push/subscribe`
 };
