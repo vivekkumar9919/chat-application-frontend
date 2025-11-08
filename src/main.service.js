@@ -125,6 +125,19 @@ const chatServices = {
             body: formData,
             credentials: true
         });
+    },
+
+    async saveSubscription(userId, subscription){
+        if(isDev){
+            return Promise.resolve(sampleResponse.saveSubscription);
+        }
+        return callApi({
+            url:API_URLS.SAVE_SUBSCRIPTION_URL,
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body:{ userId, subscription },
+            credentials: "include",
+        })
     }
 
 }

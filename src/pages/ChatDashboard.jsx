@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {Search, Users ,Settings, MessageCircle, UserPlus, LogOut } from 'lucide-react'
 import ChatWindow from './ChatWindow'
@@ -9,6 +9,9 @@ import { useSocket } from "../components/Context/SocketContext";
 import STATUS_CODES from '../constants/statusCodes';
 import Tooltip from '../components/Tooltip/Tooltip'
 import LogoWhiteUrl from '../assets/sandesh-logo-white.png';
+import ToastService from '../utility/toastService';
+import { subscribeForPushNotifications } from '../utility/pushSubscription';
+const audio = new Audio('../assets/notification-audio.mp3');
 
 const ChatDashboard = () => {
    const { user : currentUser } = useAuth();
@@ -17,53 +20,58 @@ const ChatDashboard = () => {
     const [conversations, setConversations] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState([]);
     const navigate = useNavigate();
+    const userId = currentUser?.id;
 
+
+  const playNotificationSound = useCallback(() => {
+    audio.currentTime = 0;
+    audio.play().catch(err => console.warn('Audio playback failed:', err));
+  }, []);
+
+  const handleOnlineUsers = useCallback((users) => {
+    setOnlineUsers(users);
+  }, []);
+
+  const handleReceiveMessage = useCallback((messageData) => {
+    const messageRecord = messageData[0];
+    ToastService.show(
+      'notify',
+      messageRecord?.last_message,
+      { display_name: messageRecord?.display_name, avatar_url: messageRecord.avatar },
+      20000
+    );
+    setConversations(messageData);
+    playNotificationSound();
+  }, [playNotificationSound]);
     
 
-    // Socket event handlers for online users
-    useEffect(() => {
-      if (!socket || !isConnected) return;
+  // Socket event handlers for online users
+  useEffect(() => {
+    if (!socket || !isConnected) return;
 
-      const audio = new Audio('../assets/Iphone - Ting _ Message.mp3');
+    socket.on('onlineUsers', handleOnlineUsers);
+    socket.on('newMessageNotification', handleReceiveMessage);
 
-      const playNotificationSound = () => {
-    audio.currentTime = 0; // rewind, so rapid messages all play
-    audio.play()
-      .catch(err => console.warn('Audio playback failed:', err));
-  };
-      const handleOnlineUsers = (users) => {
-        console.log('Online users:', users);
-        console.log("conversations -- ", conversations);
-        setOnlineUsers(users);
-        console.log("current id -- ", currentUser?.id);
-      };
-
-      const handleReceiveMessage = async (messageData) => {
-        console.log('Received message in dashboard:', messageData);
-
-          setConversations(messageData?.conversations);
-          // Ta-da! Sound!
-          playNotificationSound();
-      }
-
-      socket.on('onlineUsers', handleOnlineUsers);
-      socket.on(`newMessageNotification`, handleReceiveMessage)
-
-      return () => {
-        socket.off('onlineUsers', handleOnlineUsers);
-        socket.off(`newMessageNotification`, handleReceiveMessage);
-      };
-    }, [socket, isConnected, currentUser?.id]);
+    return () => {
+      socket.off('onlineUsers', handleOnlineUsers);
+      socket.off('newMessageNotification', handleReceiveMessage);
+    };
+  }, [
+    socket,
+    isConnected,
+    handleOnlineUsers,
+    handleReceiveMessage,
+  ]);
 
     useEffect(() => {
-          if(!currentUser){
+          if(!userId){
           console.log('ChatDashboard - No user data, redirecting to login');
           return;
           }
 
         async function fetchConversations(){
           try{
-            const conversations = await chatServices.fetchConversationsByUserId(currentUser?.id);
+            const conversations = await chatServices.fetchConversationsByUserId(userId);
             console.log('Fetched conversations:', conversations);
             if(conversations?.status_code === STATUS_CODES.OK){
               setConversations(conversations.conversations || []);
@@ -76,7 +84,13 @@ const ChatDashboard = () => {
 
         fetchConversations();
 
-    }, [currentUser,navigate]);
+    }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      subscribeForPushNotifications(userId);
+    }
+  }, [userId]);
 
     if (!currentUser) {
     return (
