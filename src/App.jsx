@@ -6,6 +6,8 @@ import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import AuthProvider from "./components/Context/AuthProvider";
 import SocketProvider from "./components/Context/SocketProvider";
+import NewChat from "./pages/NewChat";
+import { Toaster } from "react-hot-toast";
 
 
 function App() {
@@ -20,7 +22,9 @@ function App() {
           <Route path="/chat" element={<ChatDashboard />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/new-chat" element={<NewChat/>} />
         </Routes>
+        <Toaster position="top-center" reverseOrder={false} />
         </SocketProvider>
       </AuthProvider>
     </BrowserRouter>

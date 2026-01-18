@@ -86,7 +86,7 @@ function SignupPage() {
           <button
             type="button"
             onClick={() => navigate("/login")}
-            className="text-green-600 hover:text-green-700 font-medium"
+            className="text-green-600 hover:text-green-700 font-medium cursor-pointer"
           >
             Sign in
           </button>
